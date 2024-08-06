@@ -8,7 +8,11 @@ from PIL import Image, ImageTk
 from datetime import datetime, timedelta
 import pandas 
 import cv2
+import icecream as ic
+from tkinter import messagebox
 
+def get_tdy_date():
+    return time.strftime('%Y_%m_%d', time.localtime())
 #########################################################    change_time_state ### 
 def change_time_state():
     global time_state, student_list
@@ -52,10 +56,10 @@ def check_date_data(student_list):
         last_time = datetime(int(now_data[0]), int(now_data[1]), int(now_data[2]))
 
         f.close()
-        print(now_year)
-        print(last_time.year)
-        print(now_month)
-        print(last_time.month)
+        print(now_year)#2024
+        print(last_time.year)#2022
+        print(now_month)#8
+        print(last_time.month)#7
         if now_year > str(last_time.year):
             # change now_year to 0
             # and now_month to 0
@@ -68,11 +72,16 @@ def check_date_data(student_list):
             # change now_month to 0
             for x in student_list:
                 student_list[x]["attendance_by_month"] = 0
-
-    except FileNotFoundError:
+        
+    except FileNotFoundError as e:
         # run log file, afraid the file is too large, need many time loading, just pass first
         # dont change any thing
-        pass 
+        messagebox.showerror("Error", f"File not found: {e}")
+    except PermissionError as e:
+        messagebox.showerror("Error", f"Permission denied: {e}")
+    except Exception as e:
+        messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+    
 
     #########################################################    check_date_data ###     return student_list
     return student_list
@@ -81,61 +90,69 @@ def check_date_data(student_list):
 
 #########################################################    get_student_list ### 
 def get_student_list():
-    
-    date_now = time.strftime('%Y_%m_%d', time.localtime())
-    date_now_list = date_now + ".xlsx"
-
-    day_ans = os.popen("dir /b day_data")
-    day_list = day_ans.read().split("\n")
-    print(day_list)
-
-    #########################################################    get_student_list ### reload data
-    # check today already open or not, if alr open reload the data
-    if date_now_list in day_list:
-        student_data = pandas.read_excel("day_data/" + date_now + ".xlsx") 
-        student_list = student_data.to_dict('index')
+    try:
         
-        for x in student_list:
-            if student_list[x]["date"] == 0:
+        date_now = get_tdy_date()
+        date_now_list = date_now + ".xlsx"
+
+        day_ans = os.popen("dir /b day_data")
+        day_list = day_ans.read().split("\n")
+        print(day_list)
+
+        #########################################################    get_student_list ### reload data
+        # check today already open or not, if alr open reload the data
+        if date_now_list in day_list:
+            student_data = pandas.read_excel("day_data/" + date_now + ".xlsx") 
+            student_list = student_data.to_dict('index')
+            
+            for x in student_list:
+                if student_list[x]["date"] == 0:
+                    student_list[x]["date"] = "0"
+                if student_list[x]["time_in"] == 0:
+                    student_list[x]["time_in"] = "0"
+                if student_list[x]["time_out"] == 0:
+                    student_list[x]["time_out"] = "0"
+                if student_list[x]["attendance_days"] == 0:
+                    pass
+                if student_list[x]["attendance_by_month"] == 0:
+                    pass
+                if student_list[x]["attendance_rate"] == 0:
+                    student_list[x]["attendance_rate"] = "0"
+                if student_list[x]["attendance_rate_by_month"] == 0:
+                    student_list[x]["attendance_rate_by_month"] = "0"
+        
+        #########################################################    get_student_list ### create data
+        # if today is first time open           
+        else:
+            
+            student_data = pandas.read_excel(r"student_data.xlsx")
+                
+            student_list = student_data.to_dict('index')
+
+            for x in student_list:
                 student_list[x]["date"] = "0"
-            if student_list[x]["time_in"] == 0:
                 student_list[x]["time_in"] = "0"
-            if student_list[x]["time_out"] == 0:
                 student_list[x]["time_out"] = "0"
-            if student_list[x]["attendance_days"] == 0:
-                pass
-            if student_list[x]["attendance_by_month"] == 0:
-                pass
-            if student_list[x]["attendance_rate"] == 0:
-                student_list[x]["attendance_rate"] = "0"
-            if student_list[x]["attendance_rate_by_month"] == 0:
-                student_list[x]["attendance_rate_by_month"] = "0"
-    
-    #########################################################    get_student_list ### create data
-    # if today is first time open           
-    else:
-        student_data = pandas.read_excel(r"d:\School Onedrive\Church\attendance_system_final_26072024\installer\2_install_app\attendance system final 1.7\student_data.xlsx")
-        student_list = student_data.to_dict('index')
+
+                if str(student_list[x]["attendance_days"]) == 'nan':
+                    student_list[x]["attendance_days"] = 0
+                if str(student_list[x]["attendance_by_month"]) == 'nan':
+                    student_list[x]["attendance_by_month"] = 0
+
+                if student_list[x]["attendance_rate"] == 0 or str(student_list[x]["attendance_rate"]) == 'nan':
+                    student_list[x]["attendance_rate"] = "0"
+                if student_list[x]["attendance_rate_by_month"] == 0  or str(student_list[x]["attendance_rate_by_month"]) == 'nan':
+                    student_list[x]["attendance_rate_by_month"] = "0"
 
         for x in student_list:
-            student_list[x]["date"] = "0"
-            student_list[x]["time_in"] = "0"
-            student_list[x]["time_out"] = "0"
-
-            if str(student_list[x]["attendance_days"]) == 'nan':
-                student_list[x]["attendance_days"] = 0
-            if str(student_list[x]["attendance_by_month"]) == 'nan':
-                student_list[x]["attendance_by_month"] = 0
-
-            if student_list[x]["attendance_rate"] == 0 or str(student_list[x]["attendance_rate"]) == 'nan':
-                student_list[x]["attendance_rate"] = "0"
-            if student_list[x]["attendance_rate_by_month"] == 0  or str(student_list[x]["attendance_rate_by_month"]) == 'nan':
-                student_list[x]["attendance_rate_by_month"] = "0"
-
-    for x in student_list:
-        print(student_list[x])
-
-    #########################################################    get_student_list ###      return student_list
+            print(student_list[x])
+    except FileNotFoundError as e:
+        messagebox.showerror("Error", f"File not found: {e}")
+    except PermissionError as e:
+        messagebox.showerror("Error", f"Permission denied: {e}")
+    except Exception as e:
+        messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+        #########################################################    get_student_list ###      return student_list
     return student_list
 
 
@@ -205,7 +222,7 @@ def attendance(student_list, mydata):
         ### time in
         for x in student_list:
             if mydata == student_list[x]["code"] and student_list[x]["time_in"] == "0":
-                datenow = time.strftime('%Y-%m-%d', time.localtime())
+                datenow = get_tdy_date()
                 student_list[x]["date"] = datenow
                 timenow = time.strftime('%I:%M:%S %p', time.localtime())
                 student_list[x]["time_in"] = timenow
@@ -389,7 +406,7 @@ def print_out(student_list):
     print(Full_Data_Frame)
     
     #########################################################    print_out ### output day data
-    date_now = time.strftime('%Y_%m_%d', time.localtime())
+    date_now = get_tdy_date()
     Full_Data_Frame.to_excel("day_data/" + date_now + ".xlsx", index = False) 
     time_now = time.strftime('%Y_%m_%d', time.localtime()) + time.strftime(' %I_%M_%S %p', time.localtime())
     Full_Data_Frame.to_excel("day_data/backup/" + time_now + ".xlsx", index = False) 
@@ -463,7 +480,7 @@ def add_month_data(student_list):
     
 def change_date_data():
     f = open("student_data/last_date.txt", "w")
-    date_now = time.strftime('%Y_%m_%d', time.localtime())
+    date_now =  get_tdy_date()
     f.write(date_now)
     f.close()
 
@@ -472,7 +489,9 @@ def change_date_data():
 #########################################################    main ###
 
 student_list = get_student_list()
+#ic.ic(student_list)
 student_list = check_date_data(student_list)
+ic.ic(student_list)
 cap = cv2.VideoCapture(0)
 time_state = 0
 
@@ -480,6 +499,7 @@ time_state = 0
 root = tk.Tk()
 #width, height = 1200, 650
 root.geometry("1350x750")
+
 
 #########################################################    main ### time gui
 frame1 = tk.Frame(master=root, width=1050, height=320,bg='blue')
@@ -518,9 +538,9 @@ button6.place(x=210, y=650)
 lmain = tk.Label(root)
 lmain.pack()
 
-update_list(student_list)
+#update_list(student_list)
 
-#########################################################    main ### main loop
+########################################################    main ### main loop
 def main():
     global student_list
     
@@ -546,9 +566,14 @@ def main():
     mydata = 0
     mydata = decode_func()
     if mydata != 0:
-        student_list = attendance(student_list, mydata)
-        update_list(student_list)
-        mydata = 0
+        
+        if mydata not in [student['code'] for student in student_list.values()]:
+            print("Not in the list")
+            messagebox.showerror("Error", "Student not in database")
+        else:
+            student_list = attendance(student_list, mydata)
+            update_list(student_list)
+            mydata = 0
 
 
     #########################################################    main ### Loop main function
