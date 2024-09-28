@@ -10,6 +10,7 @@ import pandas
 import cv2
 import icecream as ic
 from tkinter import messagebox
+from tkinter import ttk
 
 def get_tdy_date():
     return time.strftime('%Y_%m_%d', time.localtime())
@@ -125,7 +126,8 @@ def get_student_list():
         # if today is first time open           
         else:
             
-            student_data = pandas.read_excel(r"student_data.xlsx")
+            student_data = pandas.read_excel(r"CCM MASTER DATABASE_UPDATED YR 2024.xlsx",sheet_name='DataBase (SAT)')
+
                 
             student_list = student_data.to_dict('index')
 
@@ -173,7 +175,7 @@ def decode_func():
 #########################################################    count_saturday ###
 # count this year and this month have how many saturday
 def count_saturday(ans):
-    time_data = ans.split("_")
+    time_data = ans.split("/")
     join_time = datetime(int(time_data[0]), int(time_data[1]), int(time_data[2]))
     year_ans = time.strftime('%Y', time.localtime())
     # a = this year data
@@ -221,7 +223,7 @@ def attendance(student_list, mydata):
     if time_state == 0:
         ### time in
         for x in student_list:
-            if mydata == student_list[x]["code"] and student_list[x]["time_in"] == "0":
+            if mydata == student_list[x]["编号"] and student_list[x]["time_in"] == "0":
                 datenow = get_tdy_date()
                 student_list[x]["date"] = datenow
                 timenow = time.strftime('%I:%M:%S %p', time.localtime())
@@ -231,7 +233,9 @@ def attendance(student_list, mydata):
                 student_list[x]["attendance_by_month"] += 1
 
                 #########################################################    attendance ### count_saturday
-                this_month, this_year = count_saturday(student_list[x]["birth"])
+                student_list[x]["生日日期"] = student_list[x]["生日日期"].strftime('%Y/%m/%d')
+                this_month, this_year = count_saturday(student_list[x]["生日日期"])
+        
 
                 student_list[x]["attendance_rate"] = str(student_list[x]["attendance_days"]) + '/' + str(this_year)
                 student_list[x]["attendance_rate_by_month"] = str(student_list[x]["attendance_by_month"]) + '/' + str(this_month)
@@ -251,7 +255,7 @@ def attendance(student_list, mydata):
     elif time_state == 1:
         ### time out
         for x in student_list:
-            if mydata == student_list[x]["code"] and student_list[x]["time_out"] == "0":
+            if mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
                 datenow = time.strftime('%Y-%m-%d', time.localtime())
                 student_list[x]["date"] = datenow
                 timenow = time.strftime('%I:%M:%S %p', time.localtime())
@@ -313,21 +317,21 @@ def update_list(student_list):
         # edit cmd and gui
         textlist1 = "name".center(25," ") + "\n" 
         textlist2 = "|" + "time_in".center(18," ")  + "\n"
-        os.system("cls")
+        #os.system("cls")
         print("          name           " + "|     time_in         ")
         num_student = str(0) + "/" + str(len(student_list))
         y = 1
         for x in print_final_list:
             if print_final_list[x]["time_in"] != "0":
                 if y <= 18:
-                    textlist1 += print_final_list[x]["english_name"].center(25," ") + "\n" 
+                    textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
                     textlist2 += "|"+ print_final_list[x]["time_in"].center(18," ")  + "\n"
                     label3.configure(text=textlist1,)
                     label2.configure(text=textlist2,)
 
                 num_student = str(len(print_final_list)) + "/" + str(len(student_list))
                 label4.configure(text=num_student,)
-                print(print_final_list[x]["english_name"].center(25," "),end="|")
+                print(print_final_list[x]["孩子姓名(中)"].center(25," "),end="|")
                 print(print_final_list[x]["time_in"].center(18," "))
                 y += 1
 
@@ -374,21 +378,21 @@ def update_list(student_list):
         # edit cmd and gui
         textlist1 = "name".center(25," ") + "\n" 
         textlist2 = "|" + "time_out".center(18," ")  + "\n"
-        os.system("cls")
+        #os.system("cls")
         print("          name           " + "|     time_out         ")
         num_student = str(0) + "/" + str(len(student_list))
         y = 1
         for x in print_final_list:
             if print_final_list[x]["time_out"] != "0":
                 if y <= 18:
-                    textlist1 += print_final_list[x]["english_name"].center(25," ") + "\n" 
+                    textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
                     textlist2 += "|"+ print_final_list[x]["time_out"].center(18," ")  + "\n"
                     label3.configure(text=textlist1,)
                     label2.configure(text=textlist2,)
 
                 num_student = str(len(print_final_list)) + "/" + str(len(student_list))
                 label4.configure(text=num_student,)
-                print(print_final_list[x]["english_name"].center(25," "),end="|")
+                print(print_final_list[x]["孩子姓名(中)"].center(25," "),end="|")
                 print(print_final_list[x]["time_out"].center(18," "))
                 y += 1
 
@@ -397,7 +401,8 @@ def update_list(student_list):
 
 
 #########################################################    print_out ### 
-# print out fo excel
+# print out t
+# o excel
 def print_out(student_list):
     
     #########################################################    print_out ### change student_list to pandas Full_Data_Frame
@@ -435,8 +440,8 @@ def add_month_data(student_list):
 
     #########################################################    add_month_data ### get month data
     # check have current month data or not
-    month_time = time.strftime("%B") 
-    month_time_xlsx = time.strftime("%B") + ".xlsx"
+    month_time = time.strftime("%B %Y") 
+    month_time_xlsx = time.strftime("%B %Y") + ".xlsx"
     month_ans = os.popen("dir /b month_data")
     month_list = month_ans.read().split("\n")
 
@@ -445,20 +450,20 @@ def add_month_data(student_list):
         output_list = pandas.read_excel("month_data/" + month_time + ".xlsx")
         
         for x in student_list:
-            if student_list[x]["code"] not in output_list["code"].tolist():
-                output_data = pandas.DataFrame([[student_list[x]["code"],student_list[x]["english_name"]]],
-                                columns = ["code","name"])
+            if student_list[x]["编号"] not in output_list["编号"].tolist():
+                output_data = pandas.DataFrame([[student_list[x]["编号"],student_list[x]["english_name"]]],
+                                columns = ["编号","name"])
                 output_list = pandas.concat([output_list,output_data])
 
         print(output_list)
 
     # if dont have month data, create month data
     else:
-        output_list = pandas.DataFrame(columns = ["code","name"])
+        output_list = pandas.DataFrame(columns = ["编号","孩子姓名(中)"])
 
         for x in student_list:
-            output_data = pandas.DataFrame([[student_list[x]["code"],student_list[x]["english_name"]]],
-                        columns = ["code","name"])
+            output_data = pandas.DataFrame([[student_list[x]["编号"],student_list[x]["孩子姓名(中)"]]],
+                        columns = ["编号","name"])
             output_list = pandas.concat([output_list,output_data])
 
     #########################################################    add_month_data ### count attendance data
@@ -489,27 +494,28 @@ def change_date_data():
 #########################################################    main ###
 
 student_list = get_student_list()
-#ic.ic(student_list)
+
 student_list = check_date_data(student_list)
 ic.ic(student_list)
+
 cap = cv2.VideoCapture(0)
 time_state = 0
 
 ### graphic ###
 root = tk.Tk()
 #width, height = 1200, 650
+root.title("CCM Attendance System")
 root.geometry("1350x750")
 
 
 #########################################################    main ### time gui
 frame1 = tk.Frame(master=root, width=1050, height=320,bg='blue')
 frame1.place(x=0, y=580)
+
 label1 = tk.Label(master=frame1,text=0, font = ('Arial' , 75), borderwidth=10,bg='blue',fg='white')
 label1.place(x=70, y=20)
 
-
-
-#########################################################    main ### display list
+########################################################    main ### display list
 frame2 = tk.Frame(master=root, width=150, height=1150)
 frame2.pack(fill=tk.BOTH, side=tk.RIGHT, expand=True)
 label2 = tk.Label(master=frame2, text="|     time         ", font = ('Arial' , 21), justify='left', borderwidth=10)
@@ -531,6 +537,10 @@ label5.place(x=20, y=640)
 
 button6 = tk.Button(master=frame3, text="change", font = ('Arial' , 18), borderwidth=8,command = change_time_state)
 button6.place(x=210, y=650)
+
+
+
+
 
 
 
@@ -567,7 +577,7 @@ def main():
     mydata = decode_func()
     if mydata != 0:
         
-        if mydata not in [student['code'] for student in student_list.values()]:
+        if mydata not in [student['编号'] for student in student_list.values()]:
             print("Not in the list")
             messagebox.showerror("Error", "Student not in database")
         else:
