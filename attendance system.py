@@ -546,67 +546,57 @@ root.title("CCM Attendance System")
 root.geometry("1350x750")
 
 
-#########################################################    main ### time gui
-frame1 = tk.Frame(master=root, width=1050, height=320,bg='blue')
-frame1.place(x=0, y=580)
+# Configure grid
+root.grid_columnconfigure(0, weight=3)
+root.grid_columnconfigure(1, weight=2)
+root.grid_rowconfigure(0, weight=3)
+root.grid_rowconfigure(1, weight=2)
 
-label1 = tk.Label(master=frame1,text=0, font = ('Arial' , 75), borderwidth=10,bg='blue',fg='white')
-label1.place(x=70, y=20)
 
-########################################################    main ### display list
-'''frame2 = tk.Frame(master=root, width=150, height=1150)
-frame2.pack(fill=tk.BOTH, side=tk.RIGHT, expand=True)
-label2 = tk.Label(master=frame2, text="|     time         ", font = ('Arial' , 21), justify='left', borderwidth=10)
-label2.place(x=0, y=0)
+# Main frame (frame1)
+frame1 = tk.Frame(master=root, bg='blue')
+frame1.grid(row=1, column=0, sticky="nsew")
 
-label4 = tk.Label(master=frame2, text=" ", font = ('Arial' , 21), borderwidth=10)
-label4.place(x=60, y=650)
+label1 = tk.Label(frame1, text="", font=('Arial', 48), bg='blue', fg='white')
+label1.pack(expand=True, fill='both')
 
-frame3 = tk.Frame(master=root, width=250, height=1150)
-frame3.pack(fill=tk.BOTH, side=tk.RIGHT, expand=True)
-label3 = tk.Label(master=frame3, text="          name           \n", font = ('Arial' , 21), justify='left', borderwidth=10)
-label3.place(x=0, y=0)'''
-# Style configuration for Treeview
+
+# Treeview style
 style = ttk.Style()
-style.configure("Treeview", font=("Helvetica", 18, "bold"), rowheight=40)  # Change font and size as needed
-style.configure("Treeview.Heading", font=("Helvetica", 24, "bold"))  # Change font and size for headings
+style.configure("Treeview", font=("Helvetica", 18, "bold"), rowheight=40)
+style.configure("Treeview.Heading", font=("Helvetica", 24, "bold"))
 
-# Frame for the Treeview and scrollbar
+# Treeview frame
 treeview_frame = tk.Frame(root)
-treeview_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+treeview_frame.grid(row=0, column=1, rowspan=1, sticky="nsew")
 
 columns = ('Name', 'Time')
-treeview = ttk.Treeview(treeview_frame, columns=columns, show='headings', height=10)  # Set height to show 10 rows
+treeview = ttk.Treeview(treeview_frame, columns=columns, show='headings', height=8)
 treeview.heading('Name', text='名字')
 treeview.heading('Time', text='时间')
-# Configure column properties to center align the text
-treeview.column('Name', anchor=tk.CENTER)
-treeview.column('Time', anchor=tk.CENTER)
+treeview.column('Name', anchor=tk.CENTER , width=100)
+treeview.column('Time', anchor=tk.CENTER, width=100)
 treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-# Make the Treeview scrollable
 scrollbar = ttk.Scrollbar(treeview_frame, orient=tk.VERTICAL, command=treeview.yview)
 treeview.configure(yscroll=scrollbar.set)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-
-
-#########################################################    main ### display state and change state
-# Frame for the bottom right section
+# Label frame
 label_frame = tk.Frame(root)
-label_frame.place(relx=0.75, rely=0.8, relwidth=0.25, relheight=0.2)
+label_frame.grid(row=1, column=1, columnspan=1, sticky="ew", padx=10, pady=10)
 
-# Add widgets to the bottom right frame
-label5 = tk.Label(label_frame, text="time in", font=('Arial', 32), borderwidth=10)
-label5.pack(side=tk.RIGHT, padx=20, pady=10)
 button6 = tk.Button(label_frame, text="change", font=('Arial', 18), borderwidth=8, command=change_time_state)
-button6.pack(side=tk.RIGHT, padx=20, pady=10)
+button6.pack(side=tk.LEFT, padx=5)
+
+label5 = tk.Label(label_frame, text="time in", font=('Arial', 32), borderwidth=10)
+label5.pack(side=tk.LEFT, padx=5)
 
 
-
-#########################################################    main ### main setup
+# Main label for image display
 lmain = tk.Label(root)
-lmain.pack()
+lmain.grid(row=0, column=0, sticky="nsew")
+
 
 #update_list(student_list)
 
@@ -621,7 +611,7 @@ def main():
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     x, y = (img.size)
-    zoom_size = 1.2
+    zoom_size = 1.4
     img = img.resize((int(x*zoom_size), int(y*zoom_size)))
     imgtk = ImageTk.PhotoImage(image=img)
     lmain.imgtk = imgtk
