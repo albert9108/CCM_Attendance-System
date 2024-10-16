@@ -254,14 +254,29 @@ def attendance(student_list, mydata):
     #########################################################    attendance ### time out
     elif time_state == 1:
         ### time out
+        
+        
+        
         for x in student_list:
-            if mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
+            if mydata  == student_list[x]["编号"]:
+                if student_list[x]["time_in"] == "0":
+                    print("Error: Student has no 'time in' data.")
+                    messagebox.showerror("Error", "Student has no 'time in' data.")
+            elif mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
                 datenow = time.strftime('%Y-%m-%d', time.localtime())
                 student_list[x]["date"] = datenow
                 timenow = time.strftime('%I:%M:%S %p', time.localtime())
                 student_list[x]["time_out"] = timenow
 
                 print_out(student_list)
+            '''if mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
+                datenow = time.strftime('%Y-%m-%d', time.localtime())
+                student_list[x]["date"] = datenow
+                timenow = time.strftime('%I:%M:%S %p', time.localtime())
+                student_list[x]["time_out"] = timenow
+            
+                print_out(student_list)
+                '''
 
         # sound output
         duration = 300  # millisecond
@@ -276,12 +291,14 @@ def attendance(student_list, mydata):
 
 #########################################################    update_list ###
 def update_list(student_list):
-    
+    displaylistin = []
+    displaylistout = []
     global time_state
 
     #########################################################    update_list ### time in
     if time_state == 0:
 
+        treeview.delete(*treeview.get_children())
         # get have "time_in" data user
         print_list = {}
         for x in student_list:
@@ -293,12 +310,16 @@ def update_list(student_list):
         
         # if no user have "time_in" data 
         if len(print_list) == 0:
+            print("timein")
+            ic.ic(student_list)
+            '''
             textlist1 = "name".center(25," ") + "\n" 
             textlist2 = "|" + "time_in".center(18," ")  + "\n"
             label3.configure(text=textlist1,)
             label2.configure(text=textlist2,)
             #########################################################    update_list ###      end
             return 0
+            '''
 
         #########################################################    update_list ### arrange list
         # arrange print_list order to order_list 
@@ -324,16 +345,23 @@ def update_list(student_list):
         for x in print_final_list:
             if print_final_list[x]["time_in"] != "0":
                 if y <= 18:
-                    textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
-                    textlist2 += "|"+ print_final_list[x]["time_in"].center(18," ")  + "\n"
-                    label3.configure(text=textlist1,)
-                    label2.configure(text=textlist2,)
+                    
+                    
+                    #textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
+                    #textlist2 += "|"+ print_final_list[x]["time_in"].center(18," ")  + "\n"
+                    #label3.configure(text=textlist1,)
+                    #label2.configure(text=textlist2,)
+                    
+                    entry = (print_final_list[x]["孩子姓名(中)"], print_final_list[x]["time_in"])
+                    if entry not in displaylistin:
+                        displaylistin.append(entry)
+                        treeview.insert('', 'end', values=entry)
 
-                num_student = str(len(print_final_list)) + "/" + str(len(student_list))
+                '''num_student = str(len(print_final_list)) + "/" + str(len(student_list))
                 label4.configure(text=num_student,)
                 print(print_final_list[x]["孩子姓名(中)"].center(25," "),end="|")
                 print(print_final_list[x]["time_in"].center(18," "))
-                y += 1
+                y += 1'''
 
         print(" ")
         print(num_student.rjust(43," "))
@@ -341,6 +369,7 @@ def update_list(student_list):
     #########################################################    update_list ### time out
     elif time_state == 1:
         
+        treeview.delete(*treeview.get_children())
         # get have "time_out" data user
         print_list = {}
         for x in student_list:
@@ -352,12 +381,16 @@ def update_list(student_list):
 
         # if no user have "time_in" data 
         if len(print_list) == 0:
+
+            print("timeout")
+            ic.ic(student_list)
+            '''
             textlist1 = "name".center(25," ") + "\n" 
             textlist2 = "|" + "time_out".center(18," ")  + "\n"
             label3.configure(text=textlist1,)
             label2.configure(text=textlist2,)
             #########################################################    update_list ###      end
-            return 0
+            return 0'''
             
 
         #########################################################    update_list ### arrange list
@@ -385,16 +418,21 @@ def update_list(student_list):
         for x in print_final_list:
             if print_final_list[x]["time_out"] != "0":
                 if y <= 18:
-                    textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
+                    
+                    entry = (print_final_list[x]["孩子姓名(中)"], print_final_list[x]["time_out"])
+                    if entry not in displaylistout:
+                        displaylistout.append(entry)
+                        treeview.insert('', 'end', values=entry)                    
+                    '''textlist1 += print_final_list[x]["孩子姓名(中)"].center(25," ") + "\n" 
                     textlist2 += "|"+ print_final_list[x]["time_out"].center(18," ")  + "\n"
                     label3.configure(text=textlist1,)
-                    label2.configure(text=textlist2,)
+                    label2.configure(text=textlist2,)'''
 
-                num_student = str(len(print_final_list)) + "/" + str(len(student_list))
+                '''num_student = str(len(print_final_list)) + "/" + str(len(student_list))
                 label4.configure(text=num_student,)
                 print(print_final_list[x]["孩子姓名(中)"].center(25," "),end="|")
                 print(print_final_list[x]["time_out"].center(18," "))
-                y += 1
+                y += 1'''
 
         print(" ")
         print(num_student.rjust(43," "))
@@ -516,7 +554,7 @@ label1 = tk.Label(master=frame1,text=0, font = ('Arial' , 75), borderwidth=10,bg
 label1.place(x=70, y=20)
 
 ########################################################    main ### display list
-frame2 = tk.Frame(master=root, width=150, height=1150)
+'''frame2 = tk.Frame(master=root, width=150, height=1150)
 frame2.pack(fill=tk.BOTH, side=tk.RIGHT, expand=True)
 label2 = tk.Label(master=frame2, text="|     time         ", font = ('Arial' , 21), justify='left', borderwidth=10)
 label2.place(x=0, y=0)
@@ -527,20 +565,42 @@ label4.place(x=60, y=650)
 frame3 = tk.Frame(master=root, width=250, height=1150)
 frame3.pack(fill=tk.BOTH, side=tk.RIGHT, expand=True)
 label3 = tk.Label(master=frame3, text="          name           \n", font = ('Arial' , 21), justify='left', borderwidth=10)
-label3.place(x=0, y=0)
+label3.place(x=0, y=0)'''
+# Style configuration for Treeview
+style = ttk.Style()
+style.configure("Treeview", font=("Helvetica", 18, "bold"), rowheight=40)  # Change font and size as needed
+style.configure("Treeview.Heading", font=("Helvetica", 24, "bold"))  # Change font and size for headings
+
+# Frame for the Treeview and scrollbar
+treeview_frame = tk.Frame(root)
+treeview_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+columns = ('Name', 'Time')
+treeview = ttk.Treeview(treeview_frame, columns=columns, show='headings', height=10)  # Set height to show 10 rows
+treeview.heading('Name', text='名字')
+treeview.heading('Time', text='时间')
+# Configure column properties to center align the text
+treeview.column('Name', anchor=tk.CENTER)
+treeview.column('Time', anchor=tk.CENTER)
+treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+# Make the Treeview scrollable
+scrollbar = ttk.Scrollbar(treeview_frame, orient=tk.VERTICAL, command=treeview.yview)
+treeview.configure(yscroll=scrollbar.set)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
 
 
 #########################################################    main ### display state and change state
-label5 = tk.Label(master=frame3, text="time in", font = ('Arial' , 32), borderwidth=10)
-label5.place(x=20, y=640)
+# Frame for the bottom right section
+label_frame = tk.Frame(root)
+label_frame.place(relx=0.75, rely=0.8, relwidth=0.25, relheight=0.2)
 
-button6 = tk.Button(master=frame3, text="change", font = ('Arial' , 18), borderwidth=8,command = change_time_state)
-button6.place(x=210, y=650)
-
-
-
-
+# Add widgets to the bottom right frame
+label5 = tk.Label(label_frame, text="time in", font=('Arial', 32), borderwidth=10)
+label5.pack(side=tk.RIGHT, padx=20, pady=10)
+button6 = tk.Button(label_frame, text="change", font=('Arial', 18), borderwidth=8, command=change_time_state)
+button6.pack(side=tk.RIGHT, padx=20, pady=10)
 
 
 

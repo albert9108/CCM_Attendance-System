@@ -1,0 +1,3 @@
+1. GUI
+2. If that day no data, press time in time out will generate a empty file, afterward all scan cannot use
+3. scaling ( Gui show not full when scale > 125%)
