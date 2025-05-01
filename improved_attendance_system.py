@@ -26,17 +26,21 @@ def change_time_state():
     #########################################################    change_time_state ### gui edit
     if time_state == 0:
         # time in gui edit
-        label5.configure(text="time in",)
+        label5.configure(text="In",)
         frame1.configure(bg='blue')
         label1.configure(bg='blue')
+        header_frame.configure(bg='blue')
+        student_count_label.configure(bg='blue')
         status_indicator.config(text="签到", bg="blue", fg="white")
 
     elif time_state == 1:
         # time out gui edit
-        label5.configure(text="time out",)
-        frame1.configure(bg='green')
-        label1.configure(bg='green')
-        status_indicator.config(text="签退", bg="green", fg="white")
+        label5.configure(text="Out",)
+        frame1.configure(bg='red')
+        label1.configure(bg='red')
+        header_frame.configure(bg='red')
+        student_count_label.configure(bg='red')
+        status_indicator.config(text="签退", bg="red", fg="white")
 
     #########################################################    change_time_state ### update_list
     # after update gui need update list
@@ -243,7 +247,7 @@ def attendance(student_list, mydata):
                 student_list[x]["attendance_rate_by_month"] = str(student_list[x]["attendance_by_month"]) + '/' + str(this_month)
                 
                 # Show student info in status bar
-                status_text.config(text=f"上次扫描: {student_list[x]['孩子姓名(中)']} - 签到成功")
+                status_text.config(text=f"Last Scanned: {student_list[x]['孩子姓名(中)']} - 签到成功")
                 print_out(student_list)
           
         # sound output
@@ -263,14 +267,14 @@ def attendance(student_list, mydata):
             if mydata  == student_list[x]["编号"]:
                 if student_list[x]["time_in"] == "0":
                     print("Error: Student has no 'time in' data.")
-                    messagebox.showerror("Error", "Student has no 'time in' data.")
+                    messagebox.showerror("Error", "未签到")
                     status_text.config(text=f"错误: 学生未签到")
                 elif mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
                     datenow = time.strftime('%Y-%m-%d', time.localtime())
                     student_list[x]["date"] = datenow
                     timenow = time.strftime('%I:%M:%S %p', time.localtime())
                     student_list[x]["time_out"] = timenow
-                    status_text.config(text=f"上次扫描: {student_list[x]['孩子姓名(中)']} - 签退成功")
+                    status_text.config(text=f"Last Scanned: {student_list[x]['孩子姓名(中)']} - 签退成功")
                 
                 print("Here")
                 print_out(student_list)
@@ -525,7 +529,7 @@ status_bar.grid_columnconfigure(0, weight=1)
 status_bar.grid_columnconfigure(1, weight=1)
 
 # Status text (shows last scanned student)
-status_text = tk.Label(status_bar, text="准备就绪", font=('Arial', 12), bg='#f0f0f0')
+status_text = tk.Label(status_bar, text="Ready", font=('Arial', 12), bg='#f0f0f0')
 status_text.grid(row=0, column=0, sticky="w", padx=10)
 
 # Current date display
@@ -541,7 +545,7 @@ right_panel.grid_rowconfigure(1, weight=1)  # Treeview
 right_panel.grid_rowconfigure(2, weight=0)  # Controls
 
 # Header for the right panel
-header_frame = tk.Frame(right_panel, bg='#3366CC', height=50)
+header_frame = tk.Frame(right_panel, bg='blue', height=50)
 header_frame.grid(row=0, column=0, sticky="ew")
 
 # Status indicator (Sign-in/Sign-out)
@@ -549,7 +553,7 @@ status_indicator = tk.Label(header_frame, text="签到", font=('Arial', 20, 'bol
 status_indicator.pack(side=tk.LEFT, padx=10, pady=5)
 
 # Student count label
-student_count_label = tk.Label(header_frame, text="0/0", font=('Arial', 16), bg='#3366CC', fg='white')
+student_count_label = tk.Label(header_frame, text="0/0", font=('Arial', 16), bg='blue', fg='white')
 student_count_label.pack(side=tk.RIGHT, padx=10, pady=5)
 
 # Treeview frame
@@ -589,7 +593,7 @@ mode_button = tk.Button(
 mode_button.pack(side=tk.LEFT, padx=10, pady=10)
 
 # Mode label
-label5 = tk.Label(controls_frame, text="time in", font=('Arial', 16, 'bold'))
+label5 = tk.Label(controls_frame, text="In", font=('Arial', 50, 'bold'))
 label5.pack(side=tk.LEFT, padx=10, pady=10)
 
 # Main label for image display
