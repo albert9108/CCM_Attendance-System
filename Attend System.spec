@@ -1,9 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
+# Create version info using a dictionary instead of the Version class
+version_info = {
+    'version': '1.1',
+    'file_description': 'CCM Attendance System',
+    'internal_name': 'CCMAttendanceSystem',
+    'legal_copyright': '© 2025',
+    'original_filename': 'CCM Attendance System.exe',
+    'product_name': 'CCM Attendance System',
+    'product_version': '1.1'
+}
 a = Analysis(
-    ['attendance system.py'],
-    pathex=[r'C:\Users\alber\OneDrive - mmu.edu.my\Church\CCM_Attendance System\installer\2_install_app\attendance system final 1.7'],
+    ['improved_attendance_system.py'],
+    pathex=[r'C:\Users\alber\OneDrive\attendance system final 1.7'],
     binaries=[
         ('libiconv.dll', '.'),
         ('libzbar-64.dll', '.')
@@ -24,17 +33,19 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='CCM Attend System',
+    name='CCM Attedance System',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='ccmlogo_PaE_icon.ico',
+    version_info = version_info
 )

@@ -489,6 +489,7 @@ time_state = 0
 ### graphic ###
 root = tk.Tk()
 root.title("CCM Attendance System")
+root.iconbitmap("ccmlogo_nKz_icon.ico")
 root.geometry("1350x750")
 root.minsize(1000, 650)  # Set minimum window size
 
