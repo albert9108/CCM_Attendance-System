@@ -10,6 +10,11 @@ version_info = {
     'product_name': 'CCM Attendance System',
     'product_version': '1.1'
 }
+
+added_files = [
+    (r'C:\Users\alber\OneDrive\attendance system final 1.7\ccmlogo_nKz_icon.ico', '.'),
+    
+]
 a = Analysis(
     ['improved_attendance_system.py'],
     pathex=[r'C:\Users\alber\OneDrive\attendance system final 1.7'],
@@ -17,7 +22,7 @@ a = Analysis(
         ('libiconv.dll', '.'),
         ('libzbar-64.dll', '.')
     ],
-    datas=[],
+    datas=added_files,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

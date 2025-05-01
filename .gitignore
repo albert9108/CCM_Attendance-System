@@ -1,6 +1,6 @@
 build/
 dist/
-day_data/
-month_data/
+day_data/*
+month_data/*
 1st.zip
 *.exe

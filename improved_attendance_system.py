@@ -475,8 +475,43 @@ def change_date_data():
     f.close()
 
 
+#########################################################    validate_environment ###
+def validate_environment():
+    """
+    Validates that all required folders and files exist, creating them if they don't.
+    """
+    # Required directories
+    required_directories = [
+        "day_data",
+        "day_data/backup",
+        "month_data",
+        "student_data"
+    ]
+    
+    # Check and create directories if they don't exist
+    for directory in required_directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"Created directory: {directory}")
+    
+    # Check for last_date.txt file
+    if not os.path.exists("student_data/last_date.txt"):
+        with open("student_data/last_date.txt", "w") as f:
+            current_date = time.strftime('%Y_%m_%d', time.localtime())
+            f.write(current_date)
+            print("Created student_data/last_date.txt")
+    
+    # Check for master database file
+    if not os.path.exists("CCM MASTER DATABASE_UPDATED YR 2024.xlsx"):
+        messagebox.showerror("Error", "Master database file not found: CCM MASTER DATABASE_UPDATED YR 2024.xlsx")
+        return False
+    
+    return True
 
 #########################################################    main ###
+
+# Validate environment before loading student list
+validate_environment()
 
 student_list = get_student_list()
 
@@ -489,7 +524,7 @@ time_state = 0
 ### graphic ###
 root = tk.Tk()
 root.title("CCM Attendance System")
-root.iconbitmap("ccmlogo_nKz_icon.ico")
+# root.iconbitmap("ccmlogo_nKz_icon.ico")
 root.geometry("1350x750")
 root.minsize(1000, 650)  # Set minimum window size
 
@@ -604,6 +639,8 @@ lmain.pack(expand=True, fill='both')
 ########################################################    main ### main loop
 def main():
     global student_list
+    
+    
     
     #########################################################    main ### change camera display
     success, img = cap.read()
