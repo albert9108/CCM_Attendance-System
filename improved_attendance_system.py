@@ -632,9 +632,26 @@ mode_button.pack(side=tk.LEFT, padx=10, pady=10)
 label5 = tk.Label(controls_frame, text="In", font=('Arial', 50, 'bold'))
 label5.pack(side=tk.LEFT, padx=10, pady=10)
 
+# Function to refresh camera
+def refresh_camera():
+    global cap
+    try:
+        # Release current camera
+        cap.release()
+        # Reinitialize camera
+        cap = cv2.VideoCapture(0)
+        status_text.config(text="Camera refreshed")
+        print("Camera refreshed")
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to refresh camera: {e}")
+        status_text.config(text="Camera refresh failed")
+
 # Main label for image display
-lmain = tk.Label(camera_frame)
+lmain = tk.Label(camera_frame, cursor="hand2")
 lmain.pack(expand=True, fill='both')
+
+# Bind click event to refresh camera
+lmain.bind("<Button-1>", lambda event: refresh_camera())
 
 ########################################################    main ### main loop
 def main():
