@@ -11,6 +11,7 @@ import cv2
 import icecream as ic
 from tkinter import messagebox
 from tkinter import ttk
+from tkinter import filedialog
 
 def get_tdy_date():
     return time.strftime('%Y_%m_%d', time.localtime())
@@ -94,6 +95,62 @@ def check_date_data(student_list):
     return student_list
     
     
+def browse_database_file():
+    """
+    Opens a file browser dialog to select the database file
+    """
+    # Define file types for the dialog
+    file_types = [
+        ('Excel files', '*.xlsx'),
+        ('Excel files (old)', '*.xls'),
+        ('All files', '*.*')
+    ]
+    
+    # Open file dialog
+    file_path = filedialog.askopenfilename(
+        title="Select Database File",
+        filetypes=file_types,
+        initialdir=".",  # Start in current directory
+        initialfile="CCM MASTER DATABASE_UPDATED YR 2024.xlsx"  # Default filename
+    )
+    
+    return file_path
+
+def get_database_file_path():
+    """
+    Gets the database file path, either from existing file or user selection
+    """
+    default_file = "CCM MASTER DATABASE_UPDATED YR 2024.xlsx"
+    
+    # Check if default file exists
+    if os.path.exists(default_file):
+        # Ask user if they want to use the existing file or browse for another
+        response = messagebox.askyesnocancel(
+            "Database File Selection",
+            f"Found existing database file:\n{default_file}\n\nDo you want to:\n• Yes - Use this file\n• No - Browse for different file\n• Cancel - Exit"
+        )
+        
+        if response is True:  # Yes - use existing file
+            return default_file
+        elif response is False:  # No - browse for file
+            file_path = browse_database_file()
+            if file_path:  # User selected a file
+                return file_path
+            else:  # User cancelled file selection
+                exit()
+                return None
+        else:  # Cancel - exit
+            exit()
+            return None
+    else:
+        # Default file doesn't exist, ask user to browse
+        messagebox.showinfo(
+            "Database File Required",
+            f"Database file '{default_file}' not found.\nPlease select the database file."
+        )
+        file_path = browse_database_file()
+        return file_path
+
 
 #########################################################    get_student_list ### 
 def get_student_list():
@@ -133,7 +190,26 @@ def get_student_list():
         # if today is first time open           
         else:
             
-            student_data = pandas.read_excel(r"CCM MASTER DATABASE_UPDATED YR 2024.xlsx",sheet_name='DataBase (SAT)')
+            # Get database file path from user selection
+            
+            database_file_path = get_database_file_path()
+            
+            if not database_file_path:
+                # User cancelled or no file selected
+                messagebox.showerror("Error", "No database file selected. Cannot continue.")
+                exit()
+                return {}
+            
+            if not os.path.exists(database_file_path):
+                messagebox.showerror("Error", f"Selected file does not exist: {database_file_path}")
+                exit()
+                return {}
+            
+            try:
+                student_data = pandas.read_excel(database_file_path, sheet_name='DataBase (SAT)')
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to read database file: {e}")
+                return {}
 
                 
             student_list = student_data.to_dict('index')
@@ -501,10 +577,7 @@ def validate_environment():
             f.write(current_date)
             print("Created student_data/last_date.txt")
     
-    # Check for master database file
-    if not os.path.exists("CCM MASTER DATABASE_UPDATED YR 2024.xlsx"):
-        messagebox.showerror("Error", "Master database file not found: CCM MASTER DATABASE_UPDATED YR 2024.xlsx")
-        return False
+    # Note: Database file check is now handled in get_student_list() with user selection
     
     return True
 
