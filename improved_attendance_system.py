@@ -2,6 +2,8 @@ import winsound
 import os
 import time
 import copy
+import logging
+import sys
 from pyzbar.pyzbar import decode
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -15,6 +17,72 @@ from tkinter import filedialog
 
 def get_tdy_date():
     return time.strftime('%Y_%m_%d', time.localtime())
+
+#########################################################    setup_logging ###
+def setup_logging():
+    """
+    Sets up logging to capture all terminal output to a log file with timestamps
+    """
+    # Create logs directory if it doesn't exist
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+    
+    # Generate log filename with current date
+    log_filename = f"logs/attendance_system_{get_tdy_date()}.log"
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.FileHandler(log_filename, mode='a', encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)  # Also keep console output
+        ]
+    )
+    
+    # Create custom logger
+    logger = logging.getLogger('AttendanceSystem')
+    
+    # Log system startup
+    logger.info("=" * 50)
+    logger.info("ATTENDANCE SYSTEM STARTED")
+    logger.info(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info(f"Log file: {log_filename}")
+    logger.info("=" * 50)
+    
+    return logger
+
+def log_message(message, level="INFO"):
+    """
+    Logs a message with timestamp
+    """
+    logger = logging.getLogger('AttendanceSystem')
+    
+    if level.upper() == "ERROR":
+        logger.error(message)
+    elif level.upper() == "WARNING":
+        logger.warning(message)
+    elif level.upper() == "DEBUG":
+        logger.debug(message)
+    else:
+        logger.info(message)
+
+class LoggingPrint:
+    """
+    Custom class to redirect print statements to both console and log file
+    """
+    def __init__(self, logger):
+        self.logger = logger
+        self.terminal = sys.stdout
+        
+    def write(self, message):
+        if message.strip():  # Only log non-empty messages
+            self.logger.info(f"PRINT: {message.strip()}")
+        self.terminal.write(message)
+        
+    def flush(self):
+        self.terminal.flush()
 #########################################################    change_time_state ### 
 def change_time_state():
     global time_state, student_list
@@ -64,10 +132,7 @@ def check_date_data(student_list):
         last_time = datetime(int(now_data[0]), int(now_data[1]), int(now_data[2]))
 
         f.close()
-        print(now_year)#2024
-        print(last_time.year)#2022
-        print(now_month)#8
-        print(last_time.month)#7
+        
         if now_year > str(last_time.year):
             # change now_year to 0
             # and now_month to 0
@@ -229,8 +294,8 @@ def get_student_list():
                 if student_list[x]["attendance_rate_by_month"] == 0  or str(student_list[x]["attendance_rate_by_month"]) == 'nan':
                     student_list[x]["attendance_rate_by_month"] = "0"
 
-        for x in student_list:
-            print(student_list[x])
+        # for x in student_list:
+        #     print(student_list[x])
     except FileNotFoundError as e:
         messagebox.showerror("Error", f"File not found: {e}")
     except PermissionError as e:
@@ -322,6 +387,9 @@ def attendance(student_list, mydata):
                 student_list[x]["attendance_rate"] = str(student_list[x]["attendance_days"]) + '/' + str(this_year)
                 student_list[x]["attendance_rate_by_month"] = str(student_list[x]["attendance_by_month"]) + '/' + str(this_month)
                 
+                # Log successful attendance
+                log_message(f"SIGN-IN: {student_list[x]['孩子姓名(中)']} (ID: {mydata}) at {timenow}")
+                
                 # Show student info in status bar
                 status_text.config(text=f"Last Scanned: {student_list[x]['孩子姓名(中)']} - 签到成功")
                 print_out(student_list)
@@ -342,7 +410,7 @@ def attendance(student_list, mydata):
         for x in student_list:
             if mydata  == student_list[x]["编号"]:
                 if student_list[x]["time_in"] == "0":
-                    print("Error: Student has no 'time in' data.")
+                    log_message(f"ERROR: Student {student_list[x]['孩子姓名(中)']} (ID: {mydata}) tried to sign out without signing in", "ERROR")
                     messagebox.showerror("Error", "未签到")
                     status_text.config(text=f"错误: 学生未签到")
                 elif mydata == student_list[x]["编号"] and student_list[x]["time_out"] == "0":
@@ -350,9 +418,12 @@ def attendance(student_list, mydata):
                     student_list[x]["date"] = datenow
                     timenow = time.strftime('%I:%M:%S %p', time.localtime())
                     student_list[x]["time_out"] = timenow
+                    
+                    # Log successful sign-out
+                    log_message(f"SIGN-OUT: {student_list[x]['孩子姓名(中)']} (ID: {mydata}) at {timenow}")
+                    
                     status_text.config(text=f"Last Scanned: {student_list[x]['孩子姓名(中)']} - 签退成功")
                 
-                print("Here")
                 print_out(student_list)
 
         # sound output
@@ -387,7 +458,7 @@ def update_list(student_list):
         # if no user have "time_in" data 
         if len(print_list) == 0:
             print("timein")
-            ic.ic(student_list)
+            # ic.ic(student_list)
             student_count_label.config(text="0/" + str(len(student_list)))
             return
 
@@ -511,7 +582,7 @@ def add_month_data(student_list):
                                 columns = ["编号","孩子姓名(中)"])
                 output_list = pandas.concat([output_list,output_data])
 
-        print(output_list)
+        # print(output_list)
 
     # if dont have month data, create month data
     else:
@@ -583,14 +654,24 @@ def validate_environment():
 
 #########################################################    main ###
 
+# Initialize logging system first
+logger = setup_logging()
+log_message("Starting attendance system initialization")
+
+# Redirect print statements to log file
+sys.stdout = LoggingPrint(logger)
+
 # Validate environment before loading student list
+log_message("Validating environment...")
 validate_environment()
 
+log_message("Loading student list...")
 student_list = get_student_list()
 
+log_message("Checking date data...")
 student_list = check_date_data(student_list)
-ic.ic(student_list)
 
+log_message("Initializing camera...")
 cap = cv2.VideoCapture(0)
 time_state = 0
 
@@ -713,9 +794,11 @@ def refresh_camera():
         cap.release()
         # Reinitialize camera
         cap = cv2.VideoCapture(0)
+        log_message("Camera refreshed successfully")
         status_text.config(text="Camera refreshed")
         print("Camera refreshed")
     except Exception as e:
+        log_message(f"Failed to refresh camera: {e}", "ERROR")
         messagebox.showerror("Error", f"Failed to refresh camera: {e}")
         status_text.config(text="Camera refresh failed")
 
@@ -787,9 +870,10 @@ def main():
     mydata = 0
     mydata = decode_func()
     if mydata != 0:
+        log_message(f"QR Code detected: {mydata}")
         
         if mydata not in [student['编号'] for student in student_list.values()]:
-            print("Not in the list")
+            log_message(f"ERROR: Unknown student ID scanned: {mydata}", "ERROR")
             messagebox.showerror("Error", "Student not in database")
             status_text.config(text="错误: 学生不在数据库中")
         else:
@@ -803,14 +887,19 @@ def main():
     
 
 # Update list when first open
+log_message("Initializing GUI...")
 update_list(student_list)
 
 # Start the main loop
+log_message("Starting main application loop")
 main()
 
 root.mainloop()
 
 # if main loop end, run output data function
+log_message("Application closing - saving final data...")
 print_out(student_list)
 add_month_data(student_list)
 change_date_data()
+log_message("Application shutdown complete")
+log_message("=" * 50)
