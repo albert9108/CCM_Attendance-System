@@ -464,7 +464,7 @@ def update_list(student_list):
 
         #########################################################    update_list ### arrange list
         # arrange print_list order to order_list 
-        print(print_list)
+        print(print_list) #open to see anyone is logged
         order_list = sorted(print_list, key=lambda x:student_list[x]["time_in"])
         order_list.reverse()
         
